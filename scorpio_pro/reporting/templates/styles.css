@@ -1,0 +1,262 @@
+/* Scorpio Pro — Report Stylesheet */
+
+/* ── Reset & Base ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+/* ── Layout ─────────────────────────────────────────────────────────── */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────── */
+header {
+  background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  border: 1px solid #334155;
+}
+
+header h1 {
+  font-size: 2rem;
+  color: #38bdf8;
+  margin-bottom: 0.25rem;
+}
+
+header h2 {
+  font-size: 1.1rem;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.meta-item {
+  background: rgba(255,255,255,0.05);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #334155;
+}
+
+.meta-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.meta-value {
+  font-size: 1rem;
+  color: #e2e8f0;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+/* ── Section ─────────────────────────────────────────────────────────── */
+.section {
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #334155;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #38bdf8;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #334155;
+}
+
+/* ── Risk Score ──────────────────────────────────────────────────────── */
+.risk-score {
+  font-size: 4rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 1rem;
+  line-height: 1;
+}
+
+.risk-label {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.score-good    { color: #16a34a; }
+.score-medium  { color: #ca8a04; }
+.score-critical{ color: #dc2626; }
+
+/* ── Summary Grid ────────────────────────────────────────────────────── */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.75rem;
+}
+
+@media (max-width: 700px) {
+  .summary-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.sev-box {
+  text-align: center;
+  padding: 1rem 0.5rem;
+  border-radius: 8px;
+  color: #fff;
+}
+
+.sev-box .count  { font-size: 2.5rem; font-weight: 700; line-height: 1; }
+.sev-box .label  { font-size: 0.75rem; text-transform: uppercase; opacity: 0.85; margin-top: 0.25rem; }
+
+.sev-critical { background: #dc2626; }
+.sev-high     { background: #ea580c; }
+.sev-medium   { background: #ca8a04; }
+.sev-low      { background: #2563eb; }
+.sev-info,
+.sev-informational { background: #475569; }
+
+/* ── Compliance Scorecard ─────────────────────────────────────────────── */
+.score-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #334155;
+}
+
+.score-row:last-child { border-bottom: none; }
+
+.fw-name       { width: 160px; font-size: 0.9rem; color: #94a3b8; flex-shrink: 0; }
+.score-bar-bg  { flex: 1; height: 12px; background: #334155; border-radius: 6px; overflow: hidden; }
+.score-bar     { height: 100%; border-radius: 6px; transition: width 0.5s ease; }
+.score-pct     { width: 50px; text-align: right; font-weight: 600; flex-shrink: 0; }
+.score-detail  { width: 220px; font-size: 0.75rem; color: #64748b; flex-shrink: 0; }
+
+/* ── Findings ────────────────────────────────────────────────────────── */
+.finding {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+
+.finding summary {
+  padding: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  list-style: none;
+  transition: background 0.15s;
+}
+
+.finding summary::-webkit-details-marker { display: none; }
+.finding summary:hover { background: #1e293b; }
+.finding[open] summary { background: #1e293b; border-bottom: 1px solid #334155; }
+
+.status-icon { font-size: 1.1rem; }
+
+.badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.finding-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.finding-table td,
+.finding-table th {
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #1e293b;
+  text-align: left;
+  vertical-align: top;
+}
+
+.finding-table th {
+  width: 130px;
+  color: #64748b;
+  font-weight: 500;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.finding-table tr:last-child td,
+.finding-table tr:last-child th { border-bottom: none; }
+
+.finding-table pre {
+  background: #0a0f1e;
+  padding: 0.75rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: #a5f3fc;
+}
+
+.tag {
+  display: inline-block;
+  background: #1e3a5f;
+  color: #38bdf8;
+  padding: 0.1rem 0.45rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  margin: 0.1rem 0.2rem 0.1rem 0;
+}
+
+/* ── Compliance Gaps ──────────────────────────────────────────────────── */
+.gap-fw-title {
+  font-size: 1rem;
+  color: #94a3b8;
+  margin: 1rem 0 0.5rem;
+}
+
+.gap-item {
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: #0f172a;
+  border-radius: 6px;
+  border-left: 3px solid #dc2626;
+}
+
+.gap-control { font-size: 0.8rem; color: #64748b; }
+.gap-title   { font-weight: 500; margin: 0.2rem 0; }
+.gap-remediation { font-size: 0.85rem; color: #94a3b8; }
+
+/* ── No Findings ──────────────────────────────────────────────────────── */
+.no-findings { color: #64748b; font-style: italic; padding: 1rem 0; }
+
+/* ── Footer ──────────────────────────────────────────────────────────── */
+footer {
+  text-align: center;
+  color: #475569;
+  font-size: 0.8rem;
+  margin-top: 2rem;
+  padding: 1rem;
+  border-top: 1px solid #334155;
+}
