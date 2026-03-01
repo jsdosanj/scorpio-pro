@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import ipaddress
 import socket
 import subprocess
-import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
@@ -36,15 +34,21 @@ class NetworkScanner(BaseScanner):
     # Common ports for passive/moderate scans
     _COMMON_PORTS = "21,22,23,25,53,80,110,111,135,139,143,443,445,993,995,1723,3306,3389,5900,8080,8443"
 
+    # Reflects both library and binary availability; updated by check_prerequisites()
+    _nmap_binary_available: bool = _NMAP_AVAILABLE
+
     def check_prerequisites(self) -> bool:
         """Check that nmap binary and python-nmap are available."""
         if not _NMAP_AVAILABLE:
             self._log.warning("python-nmap not installed; network scan will use fallback TCP connect.")
+            self._nmap_binary_available = False
+            return True
         try:
             subprocess.run(["nmap", "--version"], capture_output=True, timeout=5)
-            return True
+            self._nmap_binary_available = True
         except (FileNotFoundError, subprocess.TimeoutExpired):
             self._log.warning("nmap binary not found; using fallback TCP connect scanner.")
+            self._nmap_binary_available = False
         return True  # fallback available
 
     def run(self, scope: Any) -> list[Finding]:
@@ -120,7 +124,7 @@ class NetworkScanner(BaseScanner):
         # Limit target list for safety
         targets = targets[:50]
 
-        if _NMAP_AVAILABLE:
+        if self._nmap_binary_available:
             findings.extend(self._nmap_scan(targets, port_spec, scope))
         else:
             findings.extend(self._fallback_tcp_scan(targets, scope))

@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from html import escape as html_escape
 from pathlib import Path
 from typing import Any
 
 from scorpio_pro.scanners.base_scanner import Finding
 
 try:
-    from jinja2 import Environment, FileSystemLoader, select_autoescape
+    from jinja2 import Environment, FileSystemLoader
     _JINJA2_AVAILABLE = True
 except ImportError:
     _JINJA2_AVAILABLE = False
@@ -69,7 +70,7 @@ def generate(
         templates_dir = Path(__file__).parent.parent / "templates"
         env = Environment(
             loader=FileSystemLoader(str(templates_dir)),
-            autoescape=select_autoescape(["html", "xml"]),
+            autoescape=True,
         )
         try:
             template = env.get_template("report.html.j2")
@@ -112,22 +113,22 @@ def _build_inline_html(ctx: dict[str, Any]) -> str:
         color = _severity_color(finding.severity)
         icon = _status_icon(finding.status)
         tags_html = ", ".join(
-            f'<span class="tag">{t}</span>' for t in finding.compliance_tags
+            f'<span class="tag">{html_escape(t)}</span>' for t in finding.compliance_tags
         )
         findings_html += f"""
         <details class="finding">
           <summary>
-            <span class="badge" style="background:{color}">{finding.severity}</span>
-            {icon} <strong>#{idx:03d} {finding.title}</strong>
+            <span class="badge" style="background:{color}">{html_escape(finding.severity)}</span>
+            {icon} <strong>#{idx:03d} {html_escape(finding.title)}</strong>
           </summary>
           <table>
-            <tr><th>Test</th><td>{finding.test_run}</td></tr>
-            <tr><th>Status</th><td>{finding.status}</td></tr>
-            <tr><th>Rationale</th><td>{finding.rationale}</td></tr>
-            <tr><th>Methodology</th><td>{finding.methodology}</td></tr>
-            <tr><th>Description</th><td>{finding.description}</td></tr>
-            <tr><th>Evidence</th><td><pre>{finding.evidence}</pre></td></tr>
-            <tr><th>Remediation</th><td>{finding.remediation}</td></tr>
+            <tr><th>Test</th><td>{html_escape(finding.test_run)}</td></tr>
+            <tr><th>Status</th><td>{html_escape(finding.status)}</td></tr>
+            <tr><th>Rationale</th><td>{html_escape(finding.rationale)}</td></tr>
+            <tr><th>Methodology</th><td>{html_escape(finding.methodology)}</td></tr>
+            <tr><th>Description</th><td>{html_escape(finding.description)}</td></tr>
+            <tr><th>Evidence</th><td><pre>{html_escape(finding.evidence)}</pre></td></tr>
+            <tr><th>Remediation</th><td>{html_escape(finding.remediation)}</td></tr>
             <tr><th>Compliance</th><td>{tags_html}</td></tr>
           </table>
         </details>
@@ -158,7 +159,7 @@ def _build_inline_html(ctx: dict[str, Any]) -> str:
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Scorpio Pro Report — {ctx['engagement_name']}</title>
+  <title>Scorpio Pro Report — {html_escape(ctx['engagement_name'])}</title>
   <style>
     *{{box-sizing:border-box;margin:0;padding:0}}
     body{{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;line-height:1.6}}
@@ -204,15 +205,15 @@ def _build_inline_html(ctx: dict[str, Any]) -> str:
       <div class="meta">
         <div class="meta-item">
           <div class="meta-label">Engagement</div>
-          <div class="meta-value">{ctx['engagement_name']}</div>
+          <div class="meta-value">{html_escape(ctx['engagement_name'])}</div>
         </div>
         <div class="meta-item">
           <div class="meta-label">Authorised By</div>
-          <div class="meta-value">{ctx['authorised_by'] or 'N/A'}</div>
+          <div class="meta-value">{html_escape(ctx['authorised_by'] or 'N/A')}</div>
         </div>
         <div class="meta-item">
           <div class="meta-label">Generated</div>
-          <div class="meta-value">{ctx['generated_at']}</div>
+          <div class="meta-value">{html_escape(ctx['generated_at'])}</div>
         </div>
       </div>
     </header>

@@ -261,7 +261,7 @@ class SystemScanner(BaseScanner):
                 with open("/etc/shadow") as fh:
                     for line in fh:
                         parts = line.split(":")
-                        if len(parts) >= 2 and parts[1] in ("", "!!", "*"):
+                        if len(parts) >= 2 and parts[1] == "":
                             empty_password_users.append(parts[0])
             except PermissionError:
                 pass
@@ -325,13 +325,16 @@ class SystemScanner(BaseScanner):
                         result = subprocess.run(
                             cmd, capture_output=True, text=True, timeout=10
                         )
-                        evidence = result.stdout[:1000]
                         if any(
                             kw in result.stdout.lower()
                             for kw in ("active", "running", "chain input")
                         ):
                             enabled = True
-                        break
+                            evidence = result.stdout[:1000]
+                            break  # positive detection — no need to check further
+                        elif not evidence:
+                            # Record evidence from first command that ran, even if inactive
+                            evidence = result.stdout[:1000]
                     except FileNotFoundError:
                         continue
             elif system == "Darwin":
@@ -565,7 +568,7 @@ class SystemScanner(BaseScanner):
             try:
                 for conn in psutil.net_connections(kind="inet"):
                     if conn.status in ("LISTEN", psutil.CONN_LISTEN) or (
-                        conn.type and conn.type.name == "SOCK_DGRAM" and conn.laddr
+                        conn.type == socket.SOCK_DGRAM and conn.laddr
                     ):
                         listening.append(
                             {

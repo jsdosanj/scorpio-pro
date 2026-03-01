@@ -8,12 +8,12 @@ import ssl
 import time
 from typing import Any
 from urllib import request as urllib_request
-from urllib.error import URLError
+from urllib.parse import urlsplit
 
 from scorpio_pro.scanners.base_scanner import BaseScanner, Finding
 
 try:
-    import requests as _requests
+    import requests
     _REQUESTS_AVAILABLE = True
 except ImportError:
     _REQUESTS_AVAILABLE = False
@@ -91,17 +91,11 @@ class VulnScanner(BaseScanner):
     def _check_ssl_tls(self, target: str) -> list[Finding]:
         """Analyse the SSL/TLS configuration of a given target URL."""
         findings: list[Finding] = []
-        hostname = self._extract_hostname(target)
-        port = 443
 
-        if ":" in hostname:
-            # IPv6 or host:port
-            parts = target.rsplit(":", 1)
-            try:
-                port = int(parts[-1].rstrip("/"))
-                hostname = self._extract_hostname(parts[0])
-            except ValueError:
-                pass
+        # Use urlsplit for robust hostname/port extraction (handles IPv6 brackets too)
+        parsed = urlsplit(target if "://" in target else f"https://{target}")
+        hostname = parsed.hostname or target
+        port = parsed.port or 443
 
         # Check certificate and protocol
         issues: list[str] = []
@@ -124,10 +118,10 @@ class VulnScanner(BaseScanner):
                 if proto in ("TLSv1", "TLSv1.1", "SSLv3", "SSLv2"):
                     issues.append(f"Weak TLS protocol in use: {proto}")
                 if cipher and cipher[0]:
-                    cipher_name = cipher[0]
-                    for weak in ("RC4", "DES", "NULL", "EXPORT", "anon", "MD5"):
+                    cipher_name = cipher[0].upper()
+                    for weak in ("RC4", "DES", "NULL", "EXPORT", "ANON", "MD5"):
                         if weak in cipher_name:
-                            issues.append(f"Weak cipher suite: {cipher_name}")
+                            issues.append(f"Weak cipher suite: {cipher[0]}")
         except ssl.SSLCertVerificationError as exc:
             issues.append(f"Certificate verification error: {exc}")
         except ssl.SSLError as exc:
@@ -200,7 +194,6 @@ class VulnScanner(BaseScanner):
 
         try:
             if _REQUESTS_AVAILABLE:
-                import requests
                 resp = requests.get(target, timeout=10, verify=False, allow_redirects=True)  # noqa: S501
                 response_headers = dict(resp.headers)
             else:
@@ -322,7 +315,6 @@ class VulnScanner(BaseScanner):
                 headers["apiKey"] = DEFAULT_SETTINGS.nvd_api_key
 
             if _REQUESTS_AVAILABLE:
-                import requests
                 resp = requests.get(url, headers=headers, timeout=15)
                 data = resp.json()
             else:

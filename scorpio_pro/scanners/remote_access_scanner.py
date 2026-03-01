@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import os
 import socket
-import ssl
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -123,9 +122,11 @@ class RemoteAccessScanner(BaseScanner):
                 self._log.debug("SSH analysis error on %s: %s", host, exc)
                 info["error"] = str(exc)
 
-        # Try to read sshd_config if scanning localhost
-        local_issues = self._check_sshd_config()
-        issues.extend(local_issues)
+        # Try to read sshd_config only when scanning the local machine
+        _localhost_aliases = {"127.0.0.1", "::1", "localhost", socket.gethostname()}
+        if host in _localhost_aliases:
+            local_issues = self._check_sshd_config()
+            issues.extend(local_issues)
 
         severity = "High" if issues else "Informational"
         status = "fail" if issues else "pass"

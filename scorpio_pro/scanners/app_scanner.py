@@ -8,16 +8,8 @@ import re
 import subprocess
 from pathlib import Path
 from typing import Any
-from urllib import request as urllib_request
-from urllib.error import URLError
 
 from scorpio_pro.scanners.base_scanner import BaseScanner, Finding
-
-try:
-    import requests as _requests
-    _REQUESTS_AVAILABLE = True
-except ImportError:
-    _REQUESTS_AVAILABLE = False
 
 
 class AppScanner(BaseScanner):
