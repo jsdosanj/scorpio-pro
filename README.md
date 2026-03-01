@@ -13,7 +13,7 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%2011%20%7C%20Ubuntu%20%7C%20Debian-lightgrey)](https://github.com/jsdosanj/scorpio-pro)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/jsdosanj/scorpio-pro)
+[![Build Status](https://img.shields.io/badge/build-unknown-lightgrey)](https://github.com/jsdosanj/scorpio-pro)
 
 **🦂 Scorpio Pro** — Know your attack surface before the adversary does.
 
@@ -164,17 +164,17 @@ The Health Insurance Portability and Accountability Act Security Rule mandates a
 
 | Control ID | Control Name | What Scorpio Pro Checks |
 |---|---|---|
-| 164.308(a)(1) | Security Management Process | Risk analysis evidence, security policy artefacts |
-| 164.308(a)(5) | Security Awareness and Training | User account hygiene, training artefact discovery |
-| 164.312(a)(1) | Access Control | User privilege review, least-privilege enforcement |
-| 164.312(a)(2)(i) | Unique User Identification | Shared/generic account detection |
-| 164.312(a)(2)(iii) | Automatic Logoff | Session timeout configuration review |
-| 164.312(a)(2)(iv) | Encryption and Decryption | Disk encryption, TLS cipher strength |
-| 164.312(b) | Audit Controls | Audit log presence, SIEM integration evidence |
-| 164.312(c)(1) | Integrity | File integrity monitoring detection |
-| 164.312(d) | Person or Entity Authentication | MFA enforcement, password policy strength |
-| 164.312(e)(1) | Transmission Security | TLS configuration, VPN usage |
-| 164.314(a)(2)(i) | Business Associate Contracts | Third-party access controls |
+| HIPAA-164.308(a)(1) | Security Management Process | Risk analysis evidence, security policy artefacts |
+| HIPAA-164.308(a)(5) | Security Awareness and Training | User account hygiene, training artefact discovery |
+| HIPAA-164.312(a)(1) | Access Control | User privilege review, least-privilege enforcement |
+| HIPAA-164.312(a)(2)(i) | Unique User Identification | Shared/generic account detection |
+| HIPAA-164.312(a)(2)(iii) | Automatic Logoff | Session timeout configuration review |
+| HIPAA-164.312(a)(2)(iv) | Encryption and Decryption | Disk encryption, TLS cipher strength |
+| HIPAA-164.312(b) | Audit Controls | Audit log presence, SIEM integration evidence |
+| HIPAA-164.312(c)(1) | Integrity | File integrity monitoring detection |
+| HIPAA-164.312(d) | Person or Entity Authentication | MFA enforcement, password policy strength |
+| HIPAA-164.312(e)(1) | Transmission Security | TLS configuration, VPN usage |
+| HIPAA-164.314(a)(2)(i) | Business Associate Contracts | Third-party access controls |
 
 ---
 
@@ -199,32 +199,32 @@ The Family Educational Rights and Privacy Act governs the privacy of student edu
 The NIST CSF 2.0 organises security activities across six functions. Scorpio Pro maps findings to specific subcategory controls:
 
 **GV — Govern**
-- `GV.OC-1`: Organisational mission and risk tolerance documented
-- `GV.RM-1`: Risk management strategy established
+- `NIST-CSF-GV.OC-1`: Organisational mission and risk tolerance documented
+- `NIST-CSF-GV.RM-1`: Risk management strategy established
 
 **ID — Identify**
-- `ID.AM-1`: Software and hardware asset inventory
-- `ID.AM-2`: Software platforms and applications inventoried
-- `ID.AM-3`: Organisational communication and data flows mapped
-- `ID.RA-1`: Vulnerabilities in assets identified
+- `NIST-ID.AM-1`: Software and hardware asset inventory
+- `NIST-ID.AM-2`: Software platforms and applications inventoried
+- `NIST-ID.AM-3`: Organisational communication and data flows mapped
+- `NIST-ID.RA-1`: Vulnerabilities in assets identified
 
 **PR — Protect**
-- `PR.AC-1`: Identities and credentials managed (access control)
-- `PR.AC-3`: Remote access managed
-- `PR.AC-5`: Network integrity protected (segregation, segmentation)
-- `PR.AC-7`: Users, devices, and other assets authenticated
-- `PR.DS-2`: Data in transit protected
-- `PR.IP-12`: Vulnerability management plan in place
+- `NIST-PR.AC-1`: Identities and credentials managed (access control)
+- `NIST-PR.AC-3`: Remote access managed
+- `NIST-PR.AC-5`: Network integrity protected (segregation, segmentation)
+- `NIST-PR.AC-7`: Users, devices, and other assets authenticated
+- `NIST-PR.DS-2`: Data in transit protected
+- `NIST-PR.IP-12`: Vulnerability management plan in place
 
 **DE — Detect**
-- `DE.CM-1`: Network activity monitored for adverse events
-- `DE.CM-7`: Monitoring performed for unauthorised personnel/connections
+- `NIST-DE.CM-3`: Personnel activity monitored to detect potential cybersecurity events
+- `NIST-DE.CM-4`: Malicious code detected
 
 **RS — Respond**
-- `RS.RP-1`: Response plan executed during or after an incident
+- `NIST-RS.RP-1`: Response plan executed during or after an incident
 
 **RC — Recover**
-- `RC.RP-1`: Recovery plan executed during or after an incident
+- `NIST-RC.RP-1`: Recovery plan executed during or after an incident
 
 ---
 
@@ -328,7 +328,7 @@ scope.yaml
     ├─► AuthorizationPrompt ("YES I CONFIRM")
     │
     ├─► ScanEngine.run()
-    │       ├─► PluginManager.discover_scanners()
+    │       ├─► plugin_manager.discover_scanners()
     │       ├─► for each scanner:
     │       │       ├─► scanner.check_prerequisites()
     │       │       └─► scanner.run(scope) → [Finding, ...]
@@ -369,9 +369,9 @@ Every scan begins with a mandatory legal disclaimer and an explicit confirmation
 Do you confirm you are authorised to perform this scan? Type 'YES I CONFIRM' to proceed:
 ```
 
-### Step 3 — Scanner Discovery
+### Step 3 — Scanner Loading
 
-The `ScanEngine` uses `PluginManager` to automatically discover all available scanner modules. Scanners are discovered dynamically — adding a new scanner module to `scorpio_pro/scanners/` makes it available automatically.
+The `ScanEngine` calls `plugin_manager.discover_scanners()` (a module-level function in `scorpio_pro/core/plugin_manager.py`) to load all scanner classes. Scanner discovery iterates over a central registry list `_SCANNER_MODULES` defined in that module. To add a new scanner, you must (1) create the scanner module under `scorpio_pro/scanners/`, (2) add its name to `_SCANNER_MODULES` in `plugin_manager.py`, and (3) update any packaging hidden-import lists if building a standalone binary.
 
 ### Step 4 — Prerequisite Checks
 
@@ -382,9 +382,9 @@ Before each scanner executes, `check_prerequisites()` is called. If a required e
 
 **No scanner ever crashes the entire scan** due to a missing optional dependency.
 
-### Step 5 — Parallel Scanner Execution
+### Step 5 — Scanner Execution
 
-Each scanner runs against the scope and produces a list of `Finding` objects. Every finding contains:
+Scanners are executed sequentially by the `ScanEngine`; some scanners may perform internal parallel tasks (such as port scanning), but scanner modules themselves are not run concurrently. Each scanner runs against the scope and produces a list of `Finding` objects. Every finding contains:
 
 | Field | Description |
 |---|---|
@@ -531,13 +531,13 @@ scorpio-pro scan --scope-config scope.yaml --report-format html,json,txt --outpu
 **Step 5: View the report**
 ```bash
 # macOS
-open reports/scorpio_report_*.html
+open reports/*_report.html
 
 # Linux
-xdg-open reports/scorpio_report_*.html
+xdg-open reports/*_report.html
 
 # Windows
-start reports/scorpio_report_*.html
+start reports/*_report.html
 ```
 
 The HTML report opens in your browser with a dark-themed dashboard showing risk scores, finding severity breakdowns, and per-framework compliance scorecards.
@@ -550,7 +550,7 @@ For a quick local system assessment without any scope file:
 ```bash
 scorpio-pro scan --report-format html
 ```
-Scorpio Pro defaults to scanning `localhost` only.
+Scorpio Pro resolves your system hostname via `socket.gethostbyname(socket.gethostname())` and scans that IP address. This may be `127.0.0.1` or a non-loopback LAN address depending on your system's network configuration.
 
 ---
 
@@ -577,7 +577,7 @@ scorpio-pro scan [OPTIONS]
 
 | Flag | Short | Default | Description |
 |---|---|---|---|
-| `--scope-config PATH` | `-s` | _(localhost)_ | Path to YAML scope configuration file |
+| `--scope-config PATH` | `-s` | _(omitted ⇒ local host scan)_ | Path to YAML scope configuration file |
 | `--report-format TEXT` | `-f` | `html,json,txt` | Comma-separated report formats: `html`, `json`, `txt` |
 | `--output-dir PATH` | `-o` | `./reports` | Directory for generated reports |
 | `--yes` | `-y` | `False` | Skip authorisation prompt (CI pipelines — ensure written auth exists) |
@@ -610,10 +610,12 @@ scorpio-pro scope [OPTIONS]
 | Flag | Short | Default | Description |
 |---|---|---|---|
 | `--create` | — | — | Interactively create a new scope YAML file |
-| `--export` | — | — | Export a loaded scope to YAML |
+| `--export` | — | — | Export a loaded scope to YAML _(not yet fully implemented — see note below)_ |
 | `--import PATH` | — | — | Import and display an existing scope YAML file |
 | `--validate` | — | `False` | Validate the imported scope file (use with `--import`) |
-| `--output PATH` | `-o` | `scope.yaml` | Output file path for `--create` or `--export` |
+| `--output PATH` | `-o` | `scope.yaml` | Output file path for `--create` |
+
+> **Note on `--export`**: The `--export` flag is defined in the CLI but currently prints a message directing you to use `--import` or `--create` instead. Full export of a loaded scope is planned for a future release. In the meantime, copy or distribute the original YAML file created with `--create`.
 
 **Examples:**
 
@@ -629,9 +631,6 @@ scorpio-pro scope --import example_scope.yaml
 
 # Import and validate
 scorpio-pro scope --import example_scope.yaml --validate
-
-# Export current scope
-scorpio-pro scope --export --output my_scope.yaml
 ```
 
 ---
@@ -776,7 +775,9 @@ cloud_accounts:
 
 ### Time Windows
 
-Time windows allow you to restrict scanning to approved maintenance windows. All times are in UTC.
+Time windows define the intended maintenance windows for scanning. All times are in UTC.
+
+> **⚠️ Not yet enforced**: `time_windows` is stored in the scope configuration but is not currently consulted by the `ScanEngine` or any scanner. Do not rely on it as an operational safety control. Future releases will enforce time-based restrictions before scanning begins.
 
 ```yaml
 time_windows:
@@ -982,31 +983,31 @@ See [Cloud Scanning](#cloud-scanning) for the full dedicated section.
 
 ## Cloud Scanning
 
-Cloud scanning is designed to be maximally useful while operating safely. Scorpio Pro performs public-facing checks without credentials and deeper configuration checks with credentials.
+Cloud scanning is designed to be maximally useful while operating safely. Scorpio Pro performs credential-based checks when credentials are available and skips them gracefully when they are not.
 
 ### Credential Discovery Order
 
 ```
-1. Environment Variables
+1. Scope File Profile
+   Explicit profile/project specified in the cloud_accounts section of scope.yaml.
+   These explicit accounts are evaluated first.
+   AWS:   account_id / profile fields
+   Azure: subscription_id field
+   GCP:   project_id field
+
+2. Environment Variables
    AWS:   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
-   Azure: AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET
+   Azure: AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_CLIENT_SECRET
    GCP:   GOOGLE_APPLICATION_CREDENTIALS
 
-2. Config Files / SDK Defaults
-   AWS:   ~/.aws/credentials (profile from scope file or AWS_PROFILE)
-   Azure: Azure CLI (~/.azure/), managed identity (if on Azure VM)
+3. Config Files / SDK Defaults
+   AWS:   ~/.aws/credentials (standard AWS CLI profile)
+   Azure: Azure CLI profile (~/.azure/)
    GCP:   Application Default Credentials (~/.config/gcloud/application_default_credentials.json)
 
-3. Scope File Profile
-   Explicit profile/project specified in cloud_accounts section of scope.yaml
-
-4. Interactive Prompt
-   If no credentials discovered, Scorpio Pro prompts: "Enter AWS Access Key ID (or press Enter to skip):"
-
-5. Graceful Degradation
-   If user declines or credentials are unavailable, cloud checks that require
-   authentication are skipped. Public-facing checks (open S3 buckets, public
-   endpoints) still run without credentials.
+4. Graceful Degradation
+   If no usable credentials are found for a provider, all checks requiring
+   authentication for that provider are skipped and a warning is logged.
 ```
 
 ### AWS Checks
@@ -1044,14 +1045,6 @@ Cloud scanning is designed to be maximally useful while operating safely. Scorpi
 | Service Account Keys | `iam.serviceAccountKeys.list` | User-managed keys older than 90 days |
 | Audit Logging | `logging.sinks.list` | Admin activity and data access audit logs |
 
-### Checks Without Credentials
-
-Even without any cloud credentials, Scorpio Pro performs:
-- Public S3 bucket endpoint testing (anonymous HEAD/GET requests)
-- Azure blob storage anonymous access testing
-- Public-facing cloud service fingerprinting
-- Cloud metadata endpoint exposure testing (checks if `169.254.169.254` is reachable from discovered hosts)
-
 ---
 
 ## Report Formats
@@ -1061,11 +1054,12 @@ Even without any cloud credentials, Scorpio Pro performs:
 The HTML report is a self-contained, dark-themed security dashboard.
 
 **Sections:**
-- **Executive Summary**: overall risk score (0–100), total finding count by severity
-- **Device Inventory**: all discovered hosts with OS, open ports, services
-- **Compliance Scorecards**: per-framework score with control-level pass/fail/not-tested breakdown
-- **Findings Detail**: every finding with title, severity badge, description, evidence (collapsible), remediation steps, and compliance tags
-- **Methodology**: scan metadata, scope summary, time of scan
+- **Header**: report title, engagement name, authorised by, and generated timestamp
+- **Risk Score**: numeric overall risk score (0–100) with a textual risk-level label (Low / Moderate / High / Very High / Critical Risk)
+- **Finding Summary**: grid showing the count of findings by severity (Critical, High, Medium, Low, Informational)
+- **Compliance Scorecard**: per-framework compliance percentage bar with pass/fail/total control counts
+- **Findings**: every finding as a collapsible `<details>` block with severity badge, status icon, test name, rationale, methodology, description, evidence, remediation, and compliance tags
+- **Compliance Gaps & Remediation**: per-framework list of failed controls with control ID, title, and remediation guidance
 
 **Risk Score Colour Coding:**
 
@@ -1090,35 +1084,42 @@ The JSON report is designed for **SIEM integration, vulnerability management pla
 **Structure:**
 ```json
 {
-  "metadata": {
-    "engagement_name": "...",
-    "scan_timestamp": "2024-01-15T22:00:00Z",
-    "scorpio_version": "1.0.0",
-    "scope_summary": {...}
+  "scorpio_pro_version": "1.0.0",
+  "generated_at": "2024-01-15T22:00:00Z",
+  "engagement": {
+    "name": "Example Corp Infrastructure Assessment",
+    "authorised_by": "Jane Smith, CISO",
+    "authorisation_date": "2024-01-15"
   },
   "summary": {
     "total_findings": 47,
-    "critical": 2,
-    "high": 8,
-    "medium": 15,
-    "low": 18,
-    "informational": 4,
-    "risk_score": 62
-  },
-  "compliance": {
-    "hipaa": {"score": 71, "control_results": {...}},
-    "gdpr":  {"score": 68, "control_results": {...}},
-    ...
+    "by_severity": {
+      "Critical": 2,
+      "High": 8,
+      "Medium": 15,
+      "Low": 18,
+      "Informational": 4
+    }
   },
   "findings": [
     {
       "title": "...",
       "severity": "High",
       "status": "fail",
+      "description": "...",
+      "evidence": "...",
+      "remediation": "...",
+      "test_run": "...",
+      "rationale": "...",
+      "methodology": "...",
       "compliance_tags": ["HIPAA-164.312(e)(1)", "GDPR-Art32"],
-      ...
+      "metadata": {}
     }
-  ]
+  ],
+  "compliance": {
+    "hipaa": {"score": 71, "control_results": {...}},
+    "gdpr":  {"score": 68, "control_results": {...}}
+  }
 }
 ```
 
@@ -1305,16 +1306,15 @@ pip install pyinstaller
 
 ### Windows MSI
 
-```powershell
+```bash
 cd packaging\windows\
-# Requires WiX Toolset (https://wixtoolset.org/)
-# Install PyInstaller
-pip install pyinstaller
+# Install cx_Freeze
+pip install cx_Freeze
 
 # Build MSI installer
-.\build_msi.ps1
+python build_msi.py bdist_msi
 
-# Output: scorpio-pro-1.0.0-windows.msi
+# Output: dist/ScorpioPro-1.0.0-*.msi
 ```
 
 ### Ubuntu / Debian DEB Package
@@ -1401,7 +1401,8 @@ Scorpio Pro is typed with `mypy --strict` mode.
 2. Inherit from `BaseScanner`
 3. Implement `name`, `description`, `check_prerequisites()`, and `run()`
 4. Return a list of `Finding` objects
-5. The `PluginManager` discovers and loads it automatically — no registration needed
+5. Register the module by adding its name to `_SCANNER_MODULES` in `scorpio_pro/core/plugin_manager.py`
+6. If building a standalone binary, add the module to the packaging hidden-import list
 
 ```python
 from scorpio_pro.scanners.base_scanner import BaseScanner, Finding
@@ -1451,14 +1452,14 @@ class MyScanner(BaseScanner):
 ### Credential Handling
 
 - Cloud credentials (AWS keys, Azure tokens, GCP service account JSON) are **never written to disk** by Scorpio Pro
-- Credentials held in memory are explicitly cleared after use
+- Credentials are held only in process memory for the duration of their use and are not intentionally persisted
 - Credentials are never included in scan reports or log output (masked as `****`)
 - Default credential testing uses a **read-only** credential list — no write operations are attempted
 
 ### Scope Enforcement
 
-- Scorpio Pro **strictly enforces** the scope defined in the configuration file
-- No network packet is sent to any IP or CIDR not explicitly listed in `ips` or `cidr_ranges` (minus `exclusions`)
+- Scorpio Pro **strictly enforces** the configured scope for all IP/CIDR-based targets
+- When `ips` and/or `cidr_ranges` are defined, no network packet is sent to any IP or CIDR not explicitly listed there (minus `exclusions`). If no `ips`/`cidr_ranges` are configured (for example, when only `applications` targets are defined), some scanners may fall back to scanning the local host as resolved by the operating system hostname.
 - Exclusions are checked before every scan action, not just at the start
 - The scope config is validated for consistency before any scanner is invoked
 
@@ -1557,6 +1558,7 @@ Contributions are warmly welcomed from security researchers, developers, and com
 
 - Place your scanner in `scorpio_pro/scanners/my_scanner.py`
 - Inherit from `BaseScanner`, implement `run()` and `check_prerequisites()`
+- Register it by adding its module name to `_SCANNER_MODULES` in `scorpio_pro/core/plugin_manager.py`
 - Use graceful degradation — never let a missing tool crash the scanner
 - Map findings to existing compliance control IDs wherever possible
 - Document your methodology in the `methodology` field of each `Finding`
