@@ -1,0 +1,82 @@
+{{ "=" * 80 }}
+ SCORPIO PRO — PENETRATION TEST REPORT
+{{ "=" * 80 }}
+ Engagement  : {{ engagement_name }}
+ Authorised  : {{ authorised_by or "N/A" }}
+ Generated   : {{ generated_at }}
+ Tool Version: Scorpio Pro 1.0.0
+{{ "=" * 80 }}
+
+EXECUTIVE SUMMARY
+{{ "-" * 80 }}
+Total Findings : {{ total_findings }}
+  Critical     : {{ severity_counts.get("Critical", 0) }}
+  High         : {{ severity_counts.get("High", 0) }}
+  Medium       : {{ severity_counts.get("Medium", 0) }}
+  Low          : {{ severity_counts.get("Low", 0) }}
+  Informational: {{ severity_counts.get("Informational", 0) }}
+
+Risk Score     : {{ risk_score }}/100
+
+{% if compliance_results %}
+{{ "=" * 80 }}
+COMPLIANCE SCORECARD
+{{ "-" * 80 }}
+{% for fw_name, fw_result in compliance_results.items() %}
+  {{ "%-20s"|format(fw_name) }} {{ "%3d"|format(fw_result.score) }}%  Passed: {{ fw_result.passed }}/{{ fw_result.total_controls }}  Failed: {{ fw_result.failed }}
+{% endfor %}
+{% endif %}
+
+{{ "=" * 80 }}
+DETAILED FINDINGS
+{{ "-" * 80 }}
+{% for finding in findings %}
+Finding #{{ "%03d"|format(loop.index) }}  [{{ "%-11s"|format(finding.severity) }}]  [{{ finding.status | upper }}]
+Title       : {{ finding.title }}
+Test Run    : {{ finding.test_run }}
+Severity    : {{ finding.severity }}
+Status      : {{ finding.status }}
+
+Rationale:
+  {{ finding.rationale }}
+
+Methodology:
+  {{ finding.methodology }}
+
+Description:
+{% for line in finding.description.splitlines() %}  {{ line }}
+{% endfor %}
+Evidence:
+{% for line in finding.evidence.splitlines() %}  {{ line }}
+{% endfor %}
+Remediation:
+{% for line in finding.remediation.splitlines() %}  {{ line }}
+{% endfor %}
+{% if finding.compliance_tags %}
+Compliance Tags: {{ finding.compliance_tags | join(", ") }}
+{% endif %}
+{{ "-" * 80 }}
+{% endfor %}
+
+{% if compliance_results %}
+{{ "=" * 80 }}
+COMPLIANCE GAPS & REMEDIATION
+{{ "-" * 80 }}
+{% for fw_name, fw_result in compliance_results.items() %}
+{% if fw_result.gaps %}
+  {{ fw_name }} Gaps:
+{% for gap in fw_result.gaps %}
+    Control  : {{ gap.control }}
+    Title    : {{ gap.title }}
+    Remediate: {{ gap.remediation }}
+
+{% endfor %}
+{% else %}
+  {{ fw_name }}: No gaps identified.
+{% endif %}
+{% endfor %}
+{% endif %}
+
+{{ "=" * 80 }}
+END OF REPORT
+{{ "=" * 80 }}

@@ -1,0 +1,100 @@
+# Scorpio Pro — Example Scope Configuration
+#
+# This file defines WHAT is authorised to be tested.
+# ⚠️  Only include systems you have WRITTEN authorisation to test.
+#
+# Usage:
+#   scorpio-pro scan --scope-config example_scope.yaml
+
+# ── Engagement Metadata ──────────────────────────────────────────────────────
+engagement_name: "Example Corp Infrastructure Assessment"
+authorised_by: "Jane Smith, CISO"
+authorisation_date: "2024-01-15"
+
+# ── Scan Intensity ─────────────────────────────────────────────────────────────
+# Options: passive | moderate | aggressive
+#   passive    — No intrusive tests; reconnaissance and enumeration only.
+#   moderate   — Standard pen test; includes service probing and vuln checks.
+#   aggressive — Full test including OS fingerprinting, deeper analysis (noisier).
+intensity: moderate
+
+# ── In-Scope IP Addresses ──────────────────────────────────────────────────────
+# Individual host IPs to include in the scan.
+ips:
+  - 192.168.1.10
+  - 192.168.1.20
+  - 10.0.0.5
+
+# ── In-Scope CIDR Ranges ───────────────────────────────────────────────────────
+# Subnet ranges to scan. All hosts within these ranges are included unless
+# listed in 'exclusions' below.
+cidr_ranges:
+  - 192.168.1.0/28   # DMZ network (14 hosts)
+  - 10.0.1.0/24      # Internal application servers
+
+# ── In-Scope Subnets (descriptive) ─────────────────────────────────────────────
+# Human-readable subnet names (for documentation purposes).
+subnets:
+  - "192.168.1.0/28 — DMZ"
+  - "10.0.1.0/24 — App servers"
+
+# ── Port Scope ────────────────────────────────────────────────────────────────
+# Port ranges or individual ports to scan.
+# Format: "80", "1-1024", "8080", "443"
+ports:
+  - "1-1024"
+  - "3306"
+  - "3389"
+  - "5432"
+  - "6379"
+  - "8080"
+  - "8443"
+  - "9200"
+
+# ── In-Scope Services ────────────────────────────────────────────────────────
+# Named services to specifically test.
+services:
+  - ssh
+  - http
+  - https
+  - rdp
+  - smb
+  - ftp
+
+# ── In-Scope Applications ─────────────────────────────────────────────────────
+# Web application URLs to test.
+applications:
+  - https://app.example.com
+  - https://admin.example.com
+  - http://legacy.example.internal:8080
+
+# ── Exclusions ────────────────────────────────────────────────────────────────
+# Hosts or CIDRs explicitly excluded from scanning, even if they fall within
+# an in-scope CIDR range.
+exclusions:
+  - 192.168.1.1      # Router — excluded by client request
+  - 10.0.1.250       # Monitoring server — fragile, exclude
+
+# ── Cloud Accounts ────────────────────────────────────────────────────────────
+# Cloud provider accounts to audit.
+# Credentials will be auto-discovered from environment variables or config files.
+# You can optionally specify a profile name or account ID here.
+cloud_accounts:
+  - provider: aws
+    account_id: "123456789012"
+    profile: "pen-test-readonly"    # AWS CLI profile with read-only permissions
+  - provider: azure
+    subscription_id: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  - provider: gcp
+    project_id: "my-gcp-project-id"
+
+# ── Scan Time Windows ────────────────────────────────────────────────────────
+# Restrict scanning to specific time windows (UTC).
+# Leave empty to allow scanning at any time.
+time_windows:
+  - start: "22:00"
+    end: "06:00"
+    days: ["monday", "tuesday", "wednesday", "thursday", "friday"]
+  - start: "00:00"
+    end: "23:59"
+    days: ["saturday", "sunday"]

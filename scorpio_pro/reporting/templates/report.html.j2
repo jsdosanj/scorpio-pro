@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Scorpio Pro Report — {{ engagement_name }}</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Inline critical styles in case styles.css is not co-located */
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;line-height:1.6}
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ── Header ───────────────────────────────────────────────────── -->
+  <header>
+    <h1>🦂 Scorpio Pro</h1>
+    <h2>Penetration Test Report</h2>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="meta-label">Engagement</div>
+        <div class="meta-value">{{ engagement_name }}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Authorised By</div>
+        <div class="meta-value">{{ authorised_by or 'N/A' }}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Generated</div>
+        <div class="meta-value">{{ generated_at }}</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Risk Score ────────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Overall Risk Score</div>
+    <div class="risk-score {% if risk_score >= 85 %}score-good{% elif risk_score >= 50 %}score-medium{% else %}score-critical{% endif %}">
+      {{ risk_score }}/100
+    </div>
+    <p class="risk-label">
+      {% if risk_score >= 85 %}Low Risk{% elif risk_score >= 70 %}Moderate Risk
+      {% elif risk_score >= 50 %}High Risk{% elif risk_score >= 30 %}Very High Risk
+      {% else %}Critical Risk{% endif %}
+    </p>
+  </div>
+
+  <!-- ── Summary Stats ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Finding Summary</div>
+    <div class="summary-grid">
+      <div class="sev-box sev-critical">
+        <div class="count">{{ severity_counts.get('Critical', 0) }}</div>
+        <div class="label">Critical</div>
+      </div>
+      <div class="sev-box sev-high">
+        <div class="count">{{ severity_counts.get('High', 0) }}</div>
+        <div class="label">High</div>
+      </div>
+      <div class="sev-box sev-medium">
+        <div class="count">{{ severity_counts.get('Medium', 0) }}</div>
+        <div class="label">Medium</div>
+      </div>
+      <div class="sev-box sev-low">
+        <div class="count">{{ severity_counts.get('Low', 0) }}</div>
+        <div class="label">Low</div>
+      </div>
+      <div class="sev-box sev-info">
+        <div class="count">{{ severity_counts.get('Informational', 0) }}</div>
+        <div class="label">Info</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Compliance Scorecard ──────────────────────────────────────── -->
+  {% if compliance_results %}
+  <div class="section">
+    <div class="section-title">Compliance Scorecard</div>
+    {% for fw_name, fw_result in compliance_results.items() %}
+    <div class="score-row">
+      <div class="fw-name">{{ fw_name }}</div>
+      <div class="score-bar-bg">
+        <div class="score-bar"
+          style="width:{{ fw_result.score }}%;
+            background:{% if fw_result.score >= 80 %}#16a34a{% elif fw_result.score >= 50 %}#ca8a04{% else %}#dc2626{% endif %}">
+        </div>
+      </div>
+      <div class="score-pct">{{ fw_result.score }}%</div>
+      <div class="score-detail">
+        ✅ {{ fw_result.passed }} / ❌ {{ fw_result.failed }} / {{ fw_result.total_controls }} controls
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ── Findings ──────────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-title">Findings ({{ total_findings }})</div>
+    {% if findings %}
+    {% for finding in findings %}
+    <details class="finding">
+      <summary>
+        <span class="badge sev-{{ finding.severity | lower }}">{{ finding.severity }}</span>
+        <span class="status-icon">
+          {% if finding.status == 'pass' %}✅{% elif finding.status == 'fail' %}❌{% else %}⚠️{% endif %}
+        </span>
+        <strong>#{{ loop.index | string | zfill(3) }} {{ finding.title }}</strong>
+      </summary>
+      <table class="finding-table">
+        <tr><th>Test</th><td>{{ finding.test_run }}</td></tr>
+        <tr><th>Status</th><td>{{ finding.status }}</td></tr>
+        <tr><th>Rationale</th><td>{{ finding.rationale }}</td></tr>
+        <tr><th>Methodology</th><td>{{ finding.methodology }}</td></tr>
+        <tr><th>Description</th><td>{{ finding.description }}</td></tr>
+        <tr><th>Evidence</th><td><pre>{{ finding.evidence }}</pre></td></tr>
+        <tr><th>Remediation</th><td>{{ finding.remediation }}</td></tr>
+        <tr>
+          <th>Compliance</th>
+          <td>
+            {% for tag in finding.compliance_tags %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+          </td>
+        </tr>
+      </table>
+    </details>
+    {% endfor %}
+    {% else %}
+    <p class="no-findings">No findings recorded.</p>
+    {% endif %}
+  </div>
+
+  <!-- ── Compliance Gaps ────────────────────────────────────────────── -->
+  {% if compliance_results %}
+  <div class="section">
+    <div class="section-title">Compliance Gaps &amp; Remediation</div>
+    {% for fw_name, fw_result in compliance_results.items() %}
+    {% if fw_result.gaps %}
+    <h3 class="gap-fw-title">{{ fw_name }}</h3>
+    {% for gap in fw_result.gaps %}
+    <div class="gap-item">
+      <div class="gap-control">{{ gap.control }}</div>
+      <div class="gap-title">{{ gap.title }}</div>
+      <div class="gap-remediation">→ {{ gap.remediation }}</div>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <footer>
+    Generated by <strong>Scorpio Pro 1.0.0</strong> &mdash; {{ generated_at }}
+  </footer>
+
+</div>
+</body>
+</html>
